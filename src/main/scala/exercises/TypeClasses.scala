@@ -25,10 +25,14 @@ implicit object UserEq extends Eq[User]:
   override def equal(a: User, b: User): Boolean =
     a.name == b.name && a.age == b.age && Eq(a.email, b.email)
 
+implicit class GenericEq[T](value: T):
+  def === (other: T)(implicit equalizer: Eq[T]): Boolean = Eq(value, other)
+  def !== (other: T)(implicit equalizer: Eq[T]): Boolean = !(value === other)
+
 object TypeClasses extends App:
   val user1 = User("Diego", 22, Email.fromString("dbalseiro@gmail.com"))
   val user2 = User("Diego", 22, Email.fromString("dbalseiro@gmail.com"))
   val user3 = User("Diego", 22, Email.fromString("dbalseiro@stackbuilders.com"))
 
-  println(if Eq(user1, user2) then "1 2 iguales" else "1 2 distintos")
-  println(if Eq(user2, user3) then "1 3 iguales" else "1 3 distintos")
+  println(if user1 === user2 then "1 2 iguales" else "1 2 distintos")
+  println(if user2 !== user3 then "1 3 distintos" else "1 3 iguales")
