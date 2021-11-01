@@ -1,5 +1,7 @@
 package exercises
 
+import exercises.aeson._
+
 case class Email(username: String, host: String)
 case class User(name: String, age: Int, email: Email)
 
@@ -29,6 +31,18 @@ implicit class GenericEq[T](value: T):
   def === (other: T)(implicit equalizer: Eq[T]): Boolean = Eq(value, other)
   def !== (other: T)(implicit equalizer: Eq[T]): Boolean = !(value === other)
 
+implicit object ToJSONEmail extends ToJSONValue[Email]:
+  override def toJSONValue(email: Email): JSONValue = (email.username + "@" + email.host).toJSON
+
+implicit object ToJSONUser extends ToJSONValue[User]:
+  override def toJSONValue(user: User): JSONValue = JSONObject {
+    Map (
+      "name" -> user.name.toJSON,
+      "age" -> user.age.toJSON,
+      "email" -> user.email.toJSON
+    )
+  }
+
 object TypeClasses extends App:
   val user1 = User("Diego", 22, Email.fromString("dbalseiro@gmail.com"))
   val user2 = User("Diego", 22, Email.fromString("dbalseiro@gmail.com"))
@@ -36,3 +50,5 @@ object TypeClasses extends App:
 
   println(if user1 === user2 then "1 2 iguales" else "1 2 distintos")
   println(if user2 !== user3 then "1 3 distintos" else "1 3 iguales")
+
+  println(user1.toJSON.stringify)
